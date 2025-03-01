@@ -1,14 +1,22 @@
 
+import 'package:appcurd/src/Views/auth/login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart' show Get;
 import 'package:google_fonts/google_fonts.dart';
 
-class forgetPasswordScreen extends StatelessWidget {
+class forgetPasswordScreen extends StatefulWidget {
   const forgetPasswordScreen({
     super.key,
   });
 
+  @override
+  State<forgetPasswordScreen> createState() => _forgetPasswordScreenState();
+}
+
+class _forgetPasswordScreenState extends State<forgetPasswordScreen> {
+  TextEditingController forgotPasswordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -52,6 +60,8 @@ class forgetPasswordScreen extends StatelessWidget {
     
           // Email Input Field
           TextFormField(
+            controller: forgotPasswordController,
+            keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               labelText: "Email",
               prefixIcon: const Icon(Icons.email),
@@ -66,15 +76,25 @@ class forgetPasswordScreen extends StatelessWidget {
           // Submit Button
           Center(
             child: ElevatedButton(
-              onPressed: () {
-                Get.back(); // BottomSheet close karne ke liye
-                Get.snackbar(
-                  "Success",
-                  "Password reset link sent to email!",
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.green,
-                  colorText: Colors.white,
-                );
+              onPressed: ()async {
+                var forgetPassword=forgotPasswordController.text.trim();
+                if(forgetPassword.isEmpty){
+                  return;
+                }
+                try{
+                  await FirebaseAuth.instance.sendPasswordResetEmail(email: forgetPassword).then((value){
+                    Get.to(()=>LoginScreen());
+                  });
+
+                }on FirebaseAuthException catch (e) {
+                    String errorMessage = 'An error occurred';
+                    if (e.code == 'user-not-found') {
+                      errorMessage = 'No user found for that email.';
+                    } else if (e.code == 'invalid-email') {
+                      errorMessage = 'The email is invalid.';
+                    }
+                    // Handle the error without a snackbar, e.g., update the UI to show an error message
+                  }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,

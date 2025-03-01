@@ -1,3 +1,5 @@
+import 'package:appcurd/src/Views/auth/controller/RsgistrationServices.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,8 +12,78 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  final GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
   String? selectedGender;
   DateTime? selectedDate;
+  bool isPasswordVisible = false;
+
+  //-------------> Method to toggle Password Visibilty <-------------------
+
+  void togglePasswordVisiblity() {
+    setState(() {
+      isPasswordVisible = !isPasswordVisible;
+    });
+  }
+
+  //-------------> User Name Method <---------------
+
+  String? validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your name';
+    }
+    return null;
+  }
+
+  //---------> User Email <-----------------//
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  //----------->  User Number <-------------//
+  String? validatePhone(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your phone number';
+    }
+    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+      return 'Enter a valid 10-digit phone number';
+    }
+    return null;
+  }
+
+  //----------> User Password <-------------//
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
+  }
+
+  String? validateDOB(DateTime? value) {
+    if (value == null) {
+      return 'Please select your date of birth';
+    }
+    return null;
+  }
+
+  String? validateGender(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please select your gender';
+    }
+    return null;
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -32,217 +104,283 @@ class _RegisterScreenState extends State<RegisterScreen> {
     double screenWidth = Get.width;
     double screenHeight = Get.height;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            width: screenWidth * 0.9,
-            margin: const EdgeInsets.all(10),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                  offset: const Offset(2, 4),
-                ),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 55.0, horizontal: 16.0),
+          child: Form(
+            key: _globalKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Text(
-                    "Welcome to Registration Page",
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: screenWidth * 0.05,
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.04),
-
-                // Name Field
                 Text(
-                  "Name",
-                  style: GoogleFonts.poppins(
-                    fontSize: screenWidth * 0.04,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  "Registration",
+                  style: GoogleFonts.poppins(fontSize: screenHeight * 0.03),
                 ),
-                SizedBox(height: screenHeight * 0.01),
-                TextFormField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    prefixIcon: const Icon(Icons.person),
-                    hintText: "Enter your Name",
+                Container(
+                  width: screenWidth * 0.9,
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                    vertical: 20,
                   ),
-                ),
-
-                SizedBox(height: screenHeight * 0.02),
-
-                // DOB & Gender Row
-                Row(
-                  mainAxisSize: MainAxisSize.min, //-------Fix added
-                  children: [
-                    // DOB Picker
-                    Flexible(
-                      fit: FlexFit.loose, //--------Fix added
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "DOB",
-                            style: GoogleFonts.poppins(
-                              fontSize: screenWidth * 0.04,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: screenHeight * 0.01),
-                          GestureDetector(
-                            onTap: () => _selectDate(context),
-                            child: AbsorbPointer(
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  prefixIcon: const Icon(Icons.calendar_today),
-                                  hintText:
-                                      selectedDate == null
-                                          ? "Select DOB"
-                                          : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                        offset: const Offset(2, 4),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-
-                    // Gender Dropdown
-                    Flexible(
-                      fit: FlexFit.loose, //---------Fix added
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Gender",
-                            style: GoogleFonts.poppins(
-                              fontSize: screenWidth * 0.04,
-                              fontWeight: FontWeight.w500,
-                            ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Text(
+                          "Welcome to Registration Page",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: screenWidth * 0.04,
                           ),
-                          SizedBox(height: screenHeight * 0.01),
-                          DropdownButtonFormField<String>(
-                            isExpanded: true, //--------- Fix for layout issue
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              prefixIcon: const Icon(Icons.person_outline),
-                            ),
-                            value: selectedGender,
-                            hint: const Text("Select Gender"),
-                            items:
-                                ["Male", "Female", "Other"].map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.04),
+
+                      // Name Field
+                      Text(
+                        "Name",
+                        style: GoogleFonts.poppins(
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.01),
+                      TextFormField(
+                        controller: nameController,
+                        keyboardType: TextInputType.name,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          prefixIcon: const Icon(Icons.person),
+                          hintText: "Enter your Name",
+                        ),
+                        validator: validateName,
+                      ),
+
+                      SizedBox(height: screenHeight * 0.02),
+
+                      // Email Field
+                      Text(
+                        "Phone Number",
+                        style: GoogleFonts.poppins(
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.01),
+                      TextFormField(
+                        controller: phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          prefixIcon: const Icon(Icons.phone),
+                          hintText: "Enter your Phone Number",
+                        ),
+                        validator: validatePhone,
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      // DOB & Gender Row
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("DOB"),
+                                GestureDetector(
+                                  onTap: () => _selectDate(context),
+                                  child: AbsorbPointer(
+                                    child: TextFormField(
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        hintText:
+                                            selectedDate == null
+                                                ? "Select DOB"
+                                                : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                                      ),
+                                      validator:
+                                          (value) => validateDOB(selectedDate),
                                     ),
-                                  );
-                                }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedGender = newValue;
-                              });
-                            },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Gender"),
+                                DropdownButtonFormField<String>(
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  value: selectedGender,
+                                  hint: const Text("Select Gender"),
+                                  items:
+                                      ["Male", "Female", "Other"].map((
+                                        String value,
+                                      ) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedGender = newValue;
+                                    });
+                                  },
+                                  validator: validateGender,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.02),
+                      SizedBox(height: screenHeight * 0.02),
 
-                // Email Field
-                Text(
-                  "Email ID",
-                  style: GoogleFonts.poppins(
-                    fontSize: screenWidth * 0.04,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                TextFormField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    prefixIcon: const Icon(Icons.email),
-                    hintText: "Enter your Email ID",
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.02),
-
-                // Email Field
-                Text(
-                  "Password",
-                  style: GoogleFonts.poppins(
-                    fontSize: screenWidth * 0.04,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                TextFormField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    prefixIcon: const Icon(Icons.email),
-                    hintText: "Enter your Password",
-                  ),
-                ),
-
-                SizedBox(height: screenHeight * 0.04),
-
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Registration Logic Yahan Add Karo
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.3,
-                        vertical: 12,
+                      // Email Field
+                      Text(
+                        "Email ID",
+                        style: GoogleFonts.poppins(
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                      SizedBox(height: screenHeight * 0.01),
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          prefixIcon: const Icon(Icons.email),
+
+                          hintText: "Enter your Email ID",
+                        ),
+                        validator: validateEmail,
                       ),
-                    ),
-                    child: Text(
-                      "Register",
-                      style: GoogleFonts.poppins(
-                        fontSize: screenWidth * 0.035,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                      SizedBox(height: screenHeight * 0.02),
+
+                      // Email Field
+                      Text(
+                        "Password",
+                        style: GoogleFonts.poppins(
+                          fontSize: screenWidth * 0.04,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
+                      SizedBox(height: screenHeight * 0.01),
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: isPasswordVisible,
+                        keyboardType: TextInputType.visiblePassword,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          prefixIcon: const Icon(Icons.numbers),
+                          suffixIcon: IconButton(
+                            onPressed: togglePasswordVisiblity,
+                            icon: Icon(
+                              isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                          ),
+
+                          hintText: "Enter your Password",
+                        ),
+                        validator: validatePassword,
+                      ),
+
+                      SizedBox(height: screenHeight * 0.04),
+
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (_globalKey.currentState!.validate()) {
+                              var username = nameController.text.trim();
+                              var userphone = phoneController.text.trim();
+                              var userdob = selectedDate;
+                              var usergender = selectedGender;
+                              var useremail = emailController.text.trim();
+                              var userpassword = passwordController.text.trim();
+                              try {
+                                await FirebaseAuth.instance
+                                    .createUserWithEmailAndPassword(
+                                      email: useremail,
+                                      password: userpassword,
+                                    );
+                                UserRegistrationServices(
+                                  username,
+                                  userphone,
+                                  userdob,
+                                  usergender,
+                                  useremail,
+                                  userpassword,
+                                );
+                                Get.snackbar(
+                                  "Success",
+                                  "Account created successfully!",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              } catch (e) {
+                                Get.snackbar(
+                                  "Error",
+                                  e.toString(),
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.3,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            "Register",
+                            style: GoogleFonts.poppins(
+                              fontSize: screenWidth * 0.035,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
